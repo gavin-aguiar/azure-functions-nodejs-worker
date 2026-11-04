@@ -14,7 +14,7 @@ describe('BYOC packaging', () => {
     let root: string;
     let source: string;
     let output: string;
-    const version = '3.16.1-byoc.1';
+    const version = '3.16.1-byoc.2';
     const basename = `azure-functions-nodejs-worker-${version}.tar.gz`;
     const entrypoint = 'dist/src/nodejsWorker.js';
     const names = [

@@ -63,6 +63,10 @@ This does **not** promise compatibility with every Node.js version: use the supp
 and validate the chosen Node.js/Functions Host combination. The archive does not contain Node.js or the Host.
 Packaging does not modify worker startup or install/configure the archive in a Function App.
 
+The `3.16.1-byoc.2` fix makes worker-indexed function metadata report `language: "node"`
+for each registered function. This satisfies the Host's per-function language requirement
+for linked-worker indexing, preventing rejection of metadata with a missing language.
+
 ## Repositories
 
 These are the most important GitHub repositories that make up the Node.js experience on Azure Functions:
