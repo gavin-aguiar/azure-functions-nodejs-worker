@@ -28,6 +28,41 @@
 - Back in the worker repository, press <kbd>F5</kbd> and select the process for your running function app
 - Before you submit a PR, run `npm run lint` and `npm test` and fix any issues. If you want to debug the tests, switch your [launch profile](https://code.visualstudio.com/docs/editor/debugging) in VS Code to "Launch Unit Tests" and press <kbd>F5</kbd>.
 
+## Standalone BYOC prototype (unofficial fork)
+
+This fork can package its **locally compiled worker**, without downloading or extracting a Functions Host zip.
+The `3.16.1-byoc.1` version is an unofficial prototype, not an official Microsoft worker release.
+The existing version updater keeps `package.json`, the lockfile, `src/constants.ts`, and
+`Worker.nuspec` aligned; the NuGet pipeline and packaging layout are otherwise unchanged.
+
+```powershell
+npm ci
+npm run build
+npm run webpack
+npm run test:bundle
+npm run package:byoc -- --source . --output ..\node-byoc-release
+```
+
+The helper requires an already built source directory and an output directory **outside** that source.
+Use `node scripts/packageByoc.js --help` for CLI usage. It derives the version from `package.json`,
+validates worker metadata, rejects symlinked paths, and includes only the six files staged by
+`azure-pipelines/templates/build.yml`: `LICENSE`, `NOTICE.html`, `package.json`,
+`worker.config.json`, `dist/src/nodejsWorker.js`, and `dist/src/worker-bundle.js`.
+It adds `worker-manifest.json` at the archive root; there is no enclosing version directory.
+Sources, tests, credentials, and `node_modules` are not copied.
+
+Outputs are `azure-functions-nodejs-worker-<version>.tar.gz` and its `.sha256` sidecar
+(SHA-256 hex digest followed by the archive basename). Tar ownership, modes (`0644`), timestamps,
+entry order, and gzip metadata are normalized for repeatable packaging of identical inputs with
+the same Node.js/zlib implementation.
+
+The current webpack bundle contains JavaScript, uses Node.js built-ins, and supplies its own
+`@azure/functions-core` module. It needs no external native addon or `node_modules` directory.
+Accordingly the manifest uses `platform: "any"` and the filename has no OS, architecture, or Node ABI suffix.
+This does **not** promise compatibility with every Node.js version: use the supported versions listed above
+and validate the chosen Node.js/Functions Host combination. The archive does not contain Node.js or the Host.
+Packaging does not modify worker startup or install/configure the archive in a Function App.
+
 ## Repositories
 
 These are the most important GitHub repositories that make up the Node.js experience on Azure Functions:
